@@ -7,18 +7,23 @@ import { awsError, getClient } from "../aws.js";
 
 const router = Router();
 
-/** Lists log groups for a profile/region, optionally filtered by name prefix. */
+/** Lists log groups for a profile/region, optionally filtered by a substring. */
 router.get("/log-groups", async (req, res) => {
   const profile = String(req.query.profile ?? "default");
   const region = String(req.query.region ?? "us-east-1");
-  const prefix = req.query.prefix ? String(req.query.prefix) : undefined;
+  // Substring match anywhere in the name (CloudWatch's logGroupNamePattern),
+  // not just a prefix, so typing "welcome" matches "/aws/apigateway/welcome".
+  // The SDK rejects patterns containing "*" or ":", so strip wildcard chars
+  // the user may type out of habit.
+  const raw = req.query.prefix ? String(req.query.prefix) : "";
+  const pattern = raw.replace(/[*:]/g, "") || undefined;
 
   try {
     const client = getClient(profile, region);
     const groups: Array<{ name: string; arn?: string }> = [];
     const paginator = paginateDescribeLogGroups(
       { client, pageSize: 50 },
-      { logGroupNamePrefix: prefix },
+      { logGroupNamePattern: pattern },
     );
     for await (const page of paginator) {
       for (const g of page.logGroups ?? []) {

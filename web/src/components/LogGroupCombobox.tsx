@@ -1,8 +1,31 @@
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { api } from "../lib/api";
 import type { LogGroup } from "../lib/types";
 import { cn } from "../lib/utils";
+
+// Wrap every (case-insensitive) occurrence of `q` within `name` in an accent
+// span so the user can see why a result matched their search.
+function highlightMatch(name: string, q: string): ReactNode {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return name;
+  const haystack = name.toLowerCase();
+  const parts: ReactNode[] = [];
+  let from = 0;
+  let i = haystack.indexOf(needle, from);
+  while (i !== -1) {
+    if (i > from) parts.push(name.slice(from, i));
+    parts.push(
+      <span key={i} className="font-medium text-accent">
+        {name.slice(i, i + needle.length)}
+      </span>,
+    );
+    from = i + needle.length;
+    i = haystack.indexOf(needle, from);
+  }
+  parts.push(name.slice(from));
+  return parts;
+}
 import { Input } from "./ui";
 
 export function LogGroupCombobox({
@@ -110,7 +133,7 @@ export function LogGroupCombobox({
                 g.name === value ? "text-accent" : "text-fg",
               )}
             >
-              <span className="truncate">{g.name}</span>
+              <span className="truncate">{highlightMatch(g.name, value)}</span>
               {g.name === value && <Check className="h-3.5 w-3.5 shrink-0" />}
             </button>
           ))}
