@@ -6,4 +6,5 @@ dist/
 .env.local
 web/dist/
 server/dist/
+*.tsbuildinfo
 .gstack/
