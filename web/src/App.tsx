@@ -5,7 +5,9 @@ import { FilterBar } from "./components/FilterBar";
 import { LoggerForm } from "./components/LoggerForm";
 import { LoggerSidebar } from "./components/LoggerSidebar";
 import { LogViewer } from "./components/LogViewer";
+import { RecordedView } from "./components/RecordedView";
 import { Badge, Button } from "./components/ui";
+import { cn } from "./lib/utils";
 import { useLiveTail } from "./hooks/useLiveTail";
 import { useLoggers } from "./hooks/useLoggers";
 import { useLogs } from "./hooks/useLogs";
@@ -28,6 +30,7 @@ export default function App() {
   const [filterInput, setFilterInput] = useState("");
   const [appliedFilter, setAppliedFilter] = useState("");
   const [live, setLive] = useState(false);
+  const [view, setView] = useState<"stream" | "recorded">("stream");
 
   const active = loggers.find((l) => l.id === activeId) ?? null;
 
@@ -146,7 +149,23 @@ export default function App() {
               <span className="truncate text-xs text-fg-subtle">
                 {active.logGroup}
               </span>
-              <Badge className="ml-auto bg-bg-hover text-fg-muted">
+              <div className="ml-auto flex items-center gap-0.5 rounded-md border border-border-strong bg-bg-subtle p-0.5">
+                {(["stream", "recorded"] as const).map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setView(v)}
+                    className={cn(
+                      "rounded px-2.5 py-1 text-xs font-medium capitalize transition-colors",
+                      view === v
+                        ? "bg-accent text-bg"
+                        : "text-fg-muted hover:bg-bg-hover hover:text-fg",
+                    )}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+              <Badge className="bg-bg-hover text-fg-muted">
                 {active.region}
               </Badge>
               <Badge className="bg-bg-hover text-fg-muted">
@@ -154,37 +173,43 @@ export default function App() {
               </Badge>
             </header>
 
-            <FilterBar
-              presetMs={presetMs}
-              onPresetChange={setPresetMs}
-              filterPattern={filterInput}
-              onFilterPatternChange={setFilterInput}
-              onSubmitFilter={applyFilter}
-              live={live}
-              onLiveChange={handleLiveChange}
-              onRefresh={() => {
-                lastQueryKey.current = "";
-                runQuery(appliedFilter);
-              }}
-              loading={logs.loading}
-              tailStatus={tail.status}
-              count={count}
-            />
+            {view === "recorded" ? (
+              <RecordedView logger={active} />
+            ) : (
+              <>
+                <FilterBar
+                  presetMs={presetMs}
+                  onPresetChange={setPresetMs}
+                  filterPattern={filterInput}
+                  onFilterPatternChange={setFilterInput}
+                  onSubmitFilter={applyFilter}
+                  live={live}
+                  onLiveChange={handleLiveChange}
+                  onRefresh={() => {
+                    lastQueryKey.current = "";
+                    runQuery(appliedFilter);
+                  }}
+                  loading={logs.loading}
+                  tailStatus={tail.status}
+                  count={count}
+                />
 
-            <LogViewer
-              events={displayEvents}
-              loading={logs.loading}
-              error={live ? null : logs.error}
-              live={live}
-              nextToken={logs.nextToken}
-              loadingMore={logs.loadingMore}
-              onLoadMore={logs.loadMore}
-              emptyHint={
-                live
-                  ? "Waiting for new log events…"
-                  : "No events in this time range. Try a wider range or clearing the filter."
-              }
-            />
+                <LogViewer
+                  events={displayEvents}
+                  loading={logs.loading}
+                  error={live ? null : logs.error}
+                  live={live}
+                  nextToken={logs.nextToken}
+                  loadingMore={logs.loadingMore}
+                  onLoadMore={logs.loadMore}
+                  emptyHint={
+                    live
+                      ? "Waiting for new log events…"
+                      : "No events in this time range. Try a wider range or clearing the filter."
+                  }
+                />
+              </>
+            )}
           </>
         ) : (
           <EmptyState onAdd={openAdd} hasLoggers={loggers.length > 0} />

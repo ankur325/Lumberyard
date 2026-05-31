@@ -24,3 +24,9 @@ export interface LogGroup {
   name: string;
   arn?: string;
 }
+
+export interface Recording {
+  date: string;
+  bytes: number;
+  modifiedAt: string;
+}

@@ -1,4 +1,10 @@
-import type { LogEvent, LogGroup, Logger, LoggerInput } from "./types";
+import type {
+  LogEvent,
+  LogGroup,
+  Logger,
+  LoggerInput,
+  Recording,
+} from "./types";
 
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -91,6 +97,22 @@ export const api = {
     const params = new URLSearchParams({ loggerId });
     if (filterPattern) params.set("filterPattern", filterPattern);
     return `/api/tail?${params.toString()}`;
+  },
+
+  async listRecordings(loggerId: string): Promise<Recording[]> {
+    const params = new URLSearchParams({ loggerId });
+    const data = await json<{ recordings: Recording[] }>(
+      await fetch(`/api/recordings?${params.toString()}`),
+    );
+    return data.recordings;
+  },
+
+  async getRecording(loggerId: string, date: string): Promise<LogEvent[]> {
+    const params = new URLSearchParams({ loggerId, date });
+    const data = await json<{ events: LogEvent[] }>(
+      await fetch(`/api/recordings/events?${params.toString()}`),
+    );
+    return data.events;
   },
 };
 
