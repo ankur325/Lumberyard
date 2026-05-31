@@ -10,6 +10,7 @@ import { useLiveTail } from "./hooks/useLiveTail";
 import { useLoggers } from "./hooks/useLoggers";
 import { useLogs } from "./hooks/useLogs";
 import { useProfiles } from "./hooks/useProfiles";
+import { useTheme } from "./hooks/useTheme";
 import type { Logger } from "./lib/types";
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
   const profiles = useProfiles();
   const logs = useLogs();
   const tail = useLiveTail();
+  const { theme, toggle: toggleTheme } = useTheme();
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -126,6 +128,8 @@ export default function App() {
         loggers={loggers}
         loading={loading}
         activeId={activeId}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         onSelect={selectLogger}
         onAdd={openAdd}
         onEdit={openEdit}

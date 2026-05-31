@@ -1,4 +1,11 @@
 /** @type {import('tailwindcss').Config} */
+
+// Colors are driven by CSS variables (RGB channel triplets) defined in
+// src/index.css, so the same Tailwind tokens resolve to the dark or light
+// palette depending on the `.light` class on <html>. The `<alpha-value>`
+// placeholder keeps opacity utilities (e.g. bg-level-error/10) working.
+const v = (name) => `rgb(var(${name}) / <alpha-value>)`;
+
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
@@ -15,29 +22,29 @@ export default {
       },
       colors: {
         bg: {
-          DEFAULT: "#0b0e14",
-          subtle: "#11151f",
-          panel: "#151a24",
-          hover: "#1c2230",
+          DEFAULT: v("--bg"),
+          subtle: v("--bg-subtle"),
+          panel: v("--bg-panel"),
+          hover: v("--bg-hover"),
         },
         border: {
-          DEFAULT: "#232a38",
-          strong: "#2f3848",
+          DEFAULT: v("--border"),
+          strong: v("--border-strong"),
         },
         fg: {
-          DEFAULT: "#e6e9ef",
-          muted: "#9aa4b8",
-          subtle: "#6b7488",
+          DEFAULT: v("--fg"),
+          muted: v("--fg-muted"),
+          subtle: v("--fg-subtle"),
         },
         accent: {
-          DEFAULT: "#5b9bff",
-          hover: "#74acff",
+          DEFAULT: v("--accent"),
+          hover: v("--accent-hover"),
         },
         level: {
-          error: "#ff6b6b",
-          warn: "#f7b955",
-          info: "#5b9bff",
-          debug: "#9aa4b8",
+          error: v("--level-error"),
+          warn: v("--level-warn"),
+          info: v("--level-info"),
+          debug: v("--level-debug"),
         },
       },
       keyframes: {

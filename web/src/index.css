@@ -3,6 +3,48 @@
 @tailwind utilities;
 
 @layer base {
+  /* Dark is the default theme. Values are RGB channel triplets consumed by
+     the Tailwind color tokens in tailwind.config.js. */
+  :root {
+    --bg: 11 14 20;
+    --bg-subtle: 17 21 31;
+    --bg-panel: 21 26 36;
+    --bg-hover: 28 34 48;
+    --border: 35 42 56;
+    --border-strong: 47 56 72;
+    --fg: 230 233 239;
+    --fg-muted: 154 164 184;
+    --fg-subtle: 107 116 136;
+    --accent: 91 155 255;
+    --accent-hover: 116 172 255;
+    --level-error: 255 107 107;
+    --level-warn: 247 185 85;
+    --level-info: 91 155 255;
+    --level-debug: 154 164 184;
+    color-scheme: dark;
+  }
+
+  /* Light theme — GitHub Primer light palette. Applied when <html> has the
+     `.light` class (toggled by useTheme). */
+  :root.light {
+    --bg: 255 255 255;
+    --bg-subtle: 255 255 255;
+    --bg-panel: 246 248 250;
+    --bg-hover: 234 238 242;
+    --border: 209 217 224;
+    --border-strong: 175 184 193;
+    --fg: 31 35 40;
+    --fg-muted: 89 99 110;
+    --fg-subtle: 110 119 129;
+    --accent: 9 105 218;
+    --accent-hover: 8 96 201;
+    --level-error: 207 34 46;
+    --level-warn: 154 103 0;
+    --level-info: 9 105 218;
+    --level-debug: 110 119 129;
+    color-scheme: light;
+  }
+
   html,
   body,
   #root {
@@ -15,7 +57,7 @@
   * {
     @apply border-border;
   }
-  /* Slim scrollbars to match the dark UI. */
+  /* Slim scrollbars to match the UI. */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;

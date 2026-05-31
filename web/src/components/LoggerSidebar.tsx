@@ -1,5 +1,6 @@
-import { Pencil, Plus, ScrollText, Trash2 } from "lucide-react";
+import { Moon, Pencil, Plus, ScrollText, Sun, Trash2 } from "lucide-react";
 import type { Logger } from "../lib/types";
+import type { Theme } from "../hooks/useTheme";
 import { cn } from "../lib/utils";
 import { Badge, Button } from "./ui";
 
@@ -7,6 +8,8 @@ export function LoggerSidebar({
   loggers,
   loading,
   activeId,
+  theme,
+  onToggleTheme,
   onSelect,
   onAdd,
   onEdit,
@@ -15,6 +18,8 @@ export function LoggerSidebar({
   loggers: Logger[];
   loading: boolean;
   activeId: string | null;
+  theme: Theme;
+  onToggleTheme: () => void;
   onSelect: (logger: Logger) => void;
   onAdd: () => void;
   onEdit: (logger: Logger) => void;
@@ -27,6 +32,22 @@ export function LoggerSidebar({
         <span className="text-sm font-semibold tracking-tight text-fg">
           Lumberyard
         </span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="ml-auto h-7 w-7"
+          onClick={onToggleTheme}
+          aria-label="Toggle theme"
+          title={
+            theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
+          }
+        >
+          {theme === "dark" ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className="h-4 w-4" />
+          )}
+        </Button>
       </div>
 
       <div className="px-3 pb-2">
