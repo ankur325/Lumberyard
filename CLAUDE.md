@@ -38,16 +38,25 @@ reads `~/.aws`). `curl` the API directly for quick backend checks, e.g.
 - **Persistence** (`server/src/store.ts`): loggers are stored as a JSON array at
   `~/.lumberyard/loggers.json`. Writes are atomic (temp file + `rename`). The file is
   tiny, so it's read fresh on each request — no in-memory cache to invalidate.
+- **Recordings** (`server/src/recordings.ts`): live-tailed events are appended to
+  per-day NDJSON files at `~/.lumberyard/logs/<loggerId>/<YYYY-MM-DD>.ndjson` (one
+  event per line, bucketed by the event's own UTC date). This is the durable look-back
+  store — anything that streamed survives a logger switch or browser refresh. Reads
+  return newest-first (file is chronological, then reversed) and are capped by `limit`.
 - **AWS client** (`server/src/aws.ts`): `getClient(profile, region)` returns a
   memoized `CloudWatchLogsClient` using `fromIni({ profile })`. `awsError()` maps SDK
   error names to friendly `{ status, message }`.
 - **Endpoints** (`server/src/routes/*`): `loggers` (CRUD), `profiles` (parse names
   from `~/.aws/{config,credentials}`), `discovery` (`DescribeLogGroups` for
   autocomplete), `logs` (`FilterLogEvents`, paginated via `nextToken`), `tail`
-  (`StartLiveTail` streamed over SSE).
-- **Frontend** (`web/src`): `App.tsx` orchestrates two modes — historical (`useLogs`)
-  and live (`useLiveTail`) — and swaps which event list `LogViewer` renders. Hooks own
-  data; components are presentational. `lib/api.ts` is the single typed fetch layer.
+  (`StartLiveTail` streamed over SSE — also appends each batch to the recordings store),
+  `recordings` (list saved days + read one day's events newest-first).
+- **Frontend** (`web/src`): a header **Stream / Recorded** toggle (`view` in `App.tsx`)
+  switches the whole panel. Stream mode orchestrates two sub-modes — historical
+  (`useLogs`) and live (`useLiveTail`) — swapping which event list `LogViewer` renders.
+  Recorded mode (`RecordedView.tsx`) browses the on-disk NDJSON files (newest-first,
+  with an NDJSON download). Hooks own data; components are presentational. `lib/api.ts`
+  is the single typed fetch layer.
 
 ## Conventions
 
@@ -96,6 +105,7 @@ reads `~/.aws`). `curl` the API directly for quick backend checks, e.g.
 | --- | --- |
 | How logs are fetched / paginated | `server/src/routes/logs.ts`, `web/src/hooks/useLogs.ts` |
 | Live tail streaming | `server/src/routes/tail.ts`, `web/src/hooks/useLiveTail.ts` |
+| Recorded-log persistence / look-back | `server/src/recordings.ts`, `server/src/routes/recordings.ts`, `web/src/components/RecordedView.tsx` |
 | Saved-logger storage | `server/src/store.ts` |
 | Log-group autocomplete | `server/src/routes/discovery.ts`, `web/src/components/LogGroupCombobox.tsx` |
 | Filter bar / time presets | `web/src/components/FilterBar.tsx` |

@@ -4,7 +4,9 @@ import {
 } from "@aws-sdk/client-cloudwatch-logs";
 import { Router } from "express";
 import { awsError, getClient } from "../aws.js";
+import { appendEvents } from "../recordings.js";
 import { getLogger, updateLogger } from "../store.js";
+import type { LogEvent } from "../types.js";
 
 const router = Router();
 
@@ -80,13 +82,20 @@ router.get("/tail", async (req, res) => {
       if (event.sessionStart) {
         send("session", { state: "started" });
       } else if (event.sessionUpdate) {
+        const batch: LogEvent[] = [];
         for (const result of event.sessionUpdate.sessionResults ?? []) {
-          send("log", {
+          const logEvent: LogEvent = {
             timestamp: result.timestamp,
             message: result.message,
             logStreamName: result.logStreamName,
-          });
+          };
+          batch.push(logEvent);
+          send("log", logEvent);
         }
+        // Persist to disk for look-back; never let a write failure kill the tail.
+        appendEvents(logger.id, batch).catch((err) => {
+          console.error(`Failed to record tail events for ${logger.id}:`, err);
+        });
       }
     }
     if (!closed) send("end", { reason: "stream-closed" });

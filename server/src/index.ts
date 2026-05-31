@@ -7,6 +7,7 @@ import discoveryRouter from "./routes/discovery.js";
 import loggersRouter from "./routes/loggers.js";
 import logsRouter from "./routes/logs.js";
 import profilesRouter from "./routes/profiles.js";
+import recordingsRouter from "./routes/recordings.js";
 import tailRouter from "./routes/tail.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -24,6 +25,7 @@ app.use("/api", discoveryRouter);
 app.use("/api", loggersRouter);
 app.use("/api", logsRouter);
 app.use("/api", tailRouter);
+app.use("/api", recordingsRouter);
 
 // In production, serve the built frontend.
 const webDist = join(__dirname, "..", "..", "web", "dist");
